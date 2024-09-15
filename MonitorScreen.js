@@ -1,8 +1,6 @@
-// MonitorScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import * as Location from 'expo-location';
-import { loadGlacialLakes } from './dataParser';
 import { getDistance } from './distanceUtils';
 
 const MonitorScreen = () => {
@@ -11,6 +9,22 @@ const MonitorScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [nearbyLakes, setNearbyLakes] = useState([]);
+
+  const mockGlacialLakes = [
+    {
+      'Lake name': 'Rajururi',
+      Country: 'Peru',
+      Latitude: '-9.062778',
+      Longitude: '-77.681111',
+    },
+    {
+      'Lake name': 'SomeOtherLake',
+      Country: 'Nepal',
+      Latitude: '22.9881',
+      Longitude: '88.9250',
+    },
+    // Add more lake objects as needed
+  ];
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -29,17 +43,9 @@ const MonitorScreen = () => {
       }
     };
 
-    const fetchGlacialLakes = async () => {
-      try {
-        const data = await loadGlacialLakes();
-        setGlacialLakes(data);
-      } catch (err) {
-        setError('Error loading glacial lakes');
-      }
-    };
-
     fetchLocation();
-    fetchGlacialLakes();
+    setGlacialLakes(mockGlacialLakes); // Set mock data for testing
+    setLoading(false); // Stop loading once data is set
   }, []);
 
   useEffect(() => {
