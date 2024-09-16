@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'; 
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Location from 'expo-location';
+import { loadGlacialLakes } from './dataParser';
 import { getDistance } from './distanceUtils';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
