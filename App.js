@@ -10,6 +10,7 @@ import MonitorScreen from './MonitorScreen';
 import PredictScreen from './PredictScreen';
 import EvacuationScreen from './EvacuationScreen';
 import UserProfileScreen from './UserProfileScreen';
+import LakeMap from './LakeMap';
 
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
@@ -83,6 +84,14 @@ export default function App() {
           name="Main"
           component={MainNavigator}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen name="LakeMap" 
+        component={LakeMap} 
+        options={{ title: 'Choose a Glacial Lake' }} />
+        <Stack.Screen
+          name="MonitorScreen"
+          component={MonitorScreen}
+          options={{ title: 'Monitor Screen' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

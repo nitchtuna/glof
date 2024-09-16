@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Location from 'expo-location';
 import { getDistance } from './distanceUtils';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const MonitorScreen = () => {
   const [location, setLocation] = useState(null);
@@ -11,13 +12,19 @@ const MonitorScreen = () => {
   const [nearbyLakes, setNearbyLakes] = useState([]);
   const [selectedLake, setSelectedLake] = useState(null);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
+  const navigation = useNavigation();
+  const route = useRoute();
   
+  // Ensure route.params exists before destructuring
+  const { selectedLake: initialSelectedLake } = route?.params || {};
+
   // Initialize animation values
   const scaleAnims = nearbyLakes.map(() => new Animated.Value(1));
 
   // Mock data
   const mockGlacialLakes = [
     {
+      LakeId: 1,
       'Lake name': 'Rajururi',
       River: 'None',
       Glacier: 'RGI60-16.02480',
@@ -28,6 +35,7 @@ const MonitorScreen = () => {
       Longitude: '-122.0839',
     },
     {
+      LakeId: 2,
       'Lake name': 'SomeOtherLake',
       River: 'None',
       Glacier: 'RGI60-16.02481',
@@ -75,10 +83,10 @@ const MonitorScreen = () => {
       });
 
       setNearbyLakes(nearby);
-      setSelectedLake(nearby[0] || null);
+      setSelectedLake(initialSelectedLake || (nearby[0] || null)); // Set initial selected lake or first nearby lake
       setLoading(false);
     }
-  }, [location]);
+  }, [location, initialSelectedLake]);
 
   const handleButtonPress = (index) => {
     // Reset all buttons to default scale
@@ -97,6 +105,14 @@ const MonitorScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* New button in the top left */}
+      <TouchableOpacity
+        style={styles.chooseLakeButton}
+        onPress={() => navigation.navigate('LakeMap')} // Assuming you have a separate page for this
+      >
+        <Text style={styles.buttonText}>Choose a Glacial Lake</Text>
+      </TouchableOpacity>
+
       {location && (
         <View style={styles.locationContainer}>
           <Text style={styles.locationText}>Latitude: {location.latitude.toFixed(4)}</Text>
@@ -104,38 +120,46 @@ const MonitorScreen = () => {
         </View>
       )}
 
-      <View style={styles.modelContainer}>
-        {/* Placeholder for the 3D model */}
-        <Text style={styles.modelPlaceholder}>3D Model Placeholder</Text>
-      </View>
-
-      {selectedLake && (
-        <View style={styles.detailsContainer}>
-          <Text style={styles.detailText}>Lake Name: {selectedLake['Lake name'] || 'N/A'}</Text>
-          <Text style={styles.detailText}>River: {selectedLake['River'] || 'N/A'}</Text>
-          <Text style={styles.detailText}>Glacier: {selectedLake['Glacier'] || 'N/A'}</Text>
-          <Text style={styles.detailText}>Type of Lake: {selectedLake['Type of Lake'] || 'N/A'}</Text>
-          <Text style={styles.detailText}>Region: {selectedLake['Region'] || 'N/A'}</Text>
-          <Text style={styles.detailText}>Country: {selectedLake['Country'] || 'N/A'}</Text>
+      {nearbyLakes.length === 0 ? (
+        <View style={styles.noLakesContainer}>
+          <Text style={styles.noLakesText}>No nearby lakes found. Please choose a glacial lake to monitor.</Text>
         </View>
-      )}
+      ) : (
+        <>
+          <View style={styles.modelContainer}>
+            {/* Placeholder for the 3D model */}
+            <Text style={styles.modelPlaceholder}>3D Model Placeholder</Text>
+          </View>
 
-      {nearbyLakes.length > 1 && (
-        <View style={styles.toggleContainer}>
-          {nearbyLakes.map((lake, index) => (
-            <Animated.View
-              key={index}
-              style={[styles.buttonContainer, { transform: [{ scale: scaleAnims[index] }] }]}
-            >
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => handleButtonPress(index)}
-              >
-                <Text style={styles.buttonText}>{lake['Lake name']}</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
-        </View>
+          {selectedLake && (
+            <View style={styles.detailsContainer}>
+              <Text style={styles.detailText}>Lake Name: {selectedLake['Lake name'] || 'N/A'}</Text>
+              <Text style={styles.detailText}>River: {selectedLake['River'] || 'N/A'}</Text>
+              <Text style={styles.detailText}>Glacier: {selectedLake['Glacier'] || 'N/A'}</Text>
+              <Text style={styles.detailText}>Type of Lake: {selectedLake['Type of Lake'] || 'N/A'}</Text>
+              <Text style={styles.detailText}>Region: {selectedLake['Region'] || 'N/A'}</Text>
+              <Text style={styles.detailText}>Country: {selectedLake['Country'] || 'N/A'}</Text>
+            </View>
+          )}
+
+          {nearbyLakes.length > 1 && (
+            <View style={styles.toggleContainer}>
+              {nearbyLakes.map((lake, index) => (
+                <Animated.View
+                  key={index}
+                  style={[styles.buttonContainer, { transform: [{ scale: scaleAnims[index] }] }]}
+                >
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => handleButtonPress(index)}
+                  >
+                    <Text style={styles.buttonText}>{lake['Lake name']}</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
+            </View>
+          )}
+        </>
       )}
     </View>
   );
@@ -147,13 +171,30 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#E0F7FA', // Icy background color
   },
+  chooseLakeButton: {
+    position: 'absolute',
+    top: 16,
+    left: 10,
+    backgroundColor: '#1c0166',
+    padding: 6,
+    borderRadius: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  buttonText: {
+    color: '#fff',
+    fontFamily: 'HelveticaNeue-Medium',
+    fontSize: 14,
+  },
   locationContainer: {
     position: 'absolute',
     top: 16,
     right: 16,
     backgroundColor: '#fff',
     padding: 10,
-    borderRadius: 8,
+    borderRadius: 0, // No rounding, for rectangular shape
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -173,6 +214,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: 'HelveticaNeue-Bold',
     color: '#00115b', // Dark, icy tone for text
+  },
+  noLakesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noLakesText: {
+    fontSize: 20,
+    fontFamily: 'HelveticaNeue-Bold',
+    color: '#00115b',
+    textAlign: 'center',
   },
   detailsContainer: {
     alignItems: 'center',
