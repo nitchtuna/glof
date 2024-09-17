@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'; 
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Location from 'expo-location';
-import { loadGlacialLakes } from './dataParser';
 import { getDistance } from './distanceUtils';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import mockGlacialLakes from './AratakiItto'; // Import mock data from AratakiItto.js
 
 const MonitorScreen = () => {
   const [location, setLocation] = useState(null);
@@ -21,33 +21,6 @@ const MonitorScreen = () => {
 
   // Initialize animation values
   const scaleAnims = nearbyLakes.map(() => new Animated.Value(1));
-
-  // Mock data
-  const mockGlacialLakes = [
-    {
-      LakeId: 1,
-      'Lake name': 'Rajururi',
-      River: 'None',
-      Glacier: 'RGI60-16.02480',
-      'Type of Lake': 'Moraine',
-      Region: 'Low-latitude Andes',
-      Country: 'Peru',
-      Latitude: '37.4221',
-      Longitude: '-122.0839',
-    },
-    {
-      LakeId: 2,
-      'Lake name': 'SomeOtherLake',
-      River: 'None',
-      Glacier: 'RGI60-16.02481',
-      'Type of Lake': 'Moraine',
-      Region: 'Himalayas',
-      Country: 'Nepal',
-      Latitude: '37.4221',
-      Longitude: '-122.0839',
-    },
-    // Add more lake objects as needed
-  ];
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -258,5 +231,4 @@ const styles = StyleSheet.create({
     fontFamily: 'HelveticaNeue-Medium', // Professional font
   },
 });
-
 export default MonitorScreen;
