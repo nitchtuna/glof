@@ -1,21 +1,28 @@
 {
-  "cli": {
-    "version": ">= 12.4.1",
-    "appVersionSource": "remote"
-  },
   "build": {
     "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+      "ios": {
+        "buildType": "simulator"
+      },
+      "android": {
+        "buildType": "apk"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "ios": {
+        "buildType": "archive"
+      },
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "ios": {
+        "buildType": "archive"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
