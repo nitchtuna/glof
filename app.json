@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "glofsih",
-    "slug": "glofsih",
+    "name": "Gol Fish",
+    "slug": "golfish",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
