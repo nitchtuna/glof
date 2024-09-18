@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Location from 'expo-location';
 import { getDistance } from './distanceUtils';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -13,7 +13,7 @@ const MonitorScreen = () => {
   const [selectedLake, setSelectedLake] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const route = useRoute();
   const navigation = useNavigation();
 
@@ -55,8 +55,6 @@ const MonitorScreen = () => {
       });
 
       setNearbyLakes(nearby);
-
-      // Use lake from map if present, otherwise select the first nearby lake
       setSelectedLake(lakeFromMap || (nearby[0] || null));
       setLoading(false);
     }
@@ -76,6 +74,8 @@ const MonitorScreen = () => {
     );
   }
 
+  if (error) return <Text>{error}</Text>;
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -94,7 +94,9 @@ const MonitorScreen = () => {
 
       {nearbyLakes.length === 0 ? (
         <View style={styles.noLakesContainer}>
-          <Text style={styles.noLakesText}>No nearby lakes found. Please choose a glacial lake to monitor.</Text>
+          <Text style={styles.noLakesText}>
+            No nearby lakes found. Please choose a glacial lake to monitor.
+          </Text>
         </View>
       ) : (
         <>
@@ -141,7 +143,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#E0F7FA', // Icy background color
+    backgroundColor: '#E0F7FA',
   },
   chooseLakeButton: {
     position: 'absolute',
@@ -184,8 +186,7 @@ const styles = StyleSheet.create({
   },
   modelPlaceholder: {
     fontSize: 20,
-    fontFamily: 'HelveticaNeue-Bold',
-    color: '#00115b', // Dark, icy tone for text
+    color: '#00115b',
   },
   noLakesContainer: {
     flex: 1,
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
     margin: 8,
   },
   button: {
-    backgroundColor: '#00115b', // Demure background color
+    backgroundColor: '#00115b',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',

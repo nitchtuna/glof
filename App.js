@@ -11,8 +11,7 @@ import PredictScreen from './PredictScreen';
 import EvacuationScreen from './EvacuationScreen';
 import UserProfileScreen from './UserProfileScreen';
 import LakeMap from './LakeMap';
-import LottieView from 'lottie-react-native';
-import { MonitorLoadingScreen } from './assets/fish.json';
+import LakeDetailScreen from './LakeDetailScreen';
 
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();
@@ -95,6 +94,11 @@ export default function App() {
           component={MonitorScreen}
           options={{ title: 'Monitor Screen' }}
         />
+        <Stack.Screen
+          name="LakeDetail"
+          component={LakeDetailScreen}
+          options={{ title: 'Lake Detail' }}
+          />
       </Stack.Navigator>
     </NavigationContainer>
   );
