@@ -1,26 +1,24 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Location from 'expo-location';
 import { getDistance } from './distanceUtils';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import mockGlacialLakes from './AratakiItto'; // Import mock data from AratakiItto.js
+import mockGlacialLakes from './AratakiItto';
+import LottieView from 'lottie-react-native';
+
 
 const MonitorScreen = () => {
   const [location, setLocation] = useState(null);
-  const [glacialLakes, setGlacialLakes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [nearbyLakes, setNearbyLakes] = useState([]);
   const [selectedLake, setSelectedLake] = useState(null);
-  const [selectedButtonIndex, setSelectedButtonIndex] = useState(null);
-  const navigation = useNavigation();
-  const route = useRoute();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Ensure route.params exists before destructuring
-  const { selectedLake: initialSelectedLake } = route?.params || {};
+  const route = useRoute();
+  const navigation = useNavigation();
 
-  // Initialize animation values
-  const scaleAnims = nearbyLakes.map(() => new Animated.Value(1));
+  // Use lake selected from the LakeMap, if available
+  const { selectedLake: lakeFromMap } = route.params || {};
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -57,32 +55,32 @@ const MonitorScreen = () => {
       });
 
       setNearbyLakes(nearby);
-      setSelectedLake(initialSelectedLake || (nearby[0] || null)); // Set initial selected lake or first nearby lake
+
+      // Use lake from map if present, otherwise select the first nearby lake
+      setSelectedLake(lakeFromMap || (nearby[0] || null));
       setLoading(false);
     }
-  }, [location, initialSelectedLake]);
+  }, [location, lakeFromMap]);
 
-  const handleButtonPress = (index) => {
-    // Reset all buttons to default scale
-    scaleAnims.forEach((anim, i) => {
-      Animated.spring(anim, {
-        toValue: i === index ? 1.1 : 1,
-        useNativeDriver: true,
-      }).start();
-    });
-    setSelectedButtonIndex(index);
-    setSelectedLake(nearbyLakes[index]);
-  };
-
-  if (loading) return <ActivityIndicator />; // Loading spinner
-  if (error) return <Text>{error}</Text>; // Error message
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        {/* Add your Lottie animation here */}
+        <LottieView
+          source={require('./assets/fish.json')} // Update this to your actual Lottie file
+          autoPlay
+          loop
+          style={styles.lottie}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* New button in the top left */}
       <TouchableOpacity
         style={styles.chooseLakeButton}
-        onPress={() => navigation.navigate('LakeMap')} // Assuming you have a separate page for this
+        onPress={() => navigation.navigate('LakeMap')}
       >
         <Text style={styles.buttonText}>Choose a Glacial Lake</Text>
       </TouchableOpacity>
@@ -110,7 +108,7 @@ const MonitorScreen = () => {
               <Text style={styles.detailText}>Lake Name: {selectedLake['Lake name'] || 'N/A'}</Text>
               <Text style={styles.detailText}>River: {selectedLake['River'] || 'N/A'}</Text>
               <Text style={styles.detailText}>Glacier: {selectedLake['Glacier'] || 'N/A'}</Text>
-              <Text style={styles.detailText}>Type of Lake: {selectedLake['Type of Lake'] || 'N/A'}</Text>
+              <Text style={styles.detailText}>Type of Lake: {selectedLake['Lake type'] || 'N/A'}</Text>
               <Text style={styles.detailText}>Region: {selectedLake['Region'] || 'N/A'}</Text>
               <Text style={styles.detailText}>Country: {selectedLake['Country'] || 'N/A'}</Text>
             </View>
@@ -225,10 +223,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'HelveticaNeue-Medium', // Professional font
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E0F7FA',
+  },
+  lottie: {
+    width: 150,
+    height: 150,
   },
 });
+
 export default MonitorScreen;

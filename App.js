@@ -11,6 +11,8 @@ import PredictScreen from './PredictScreen';
 import EvacuationScreen from './EvacuationScreen';
 import UserProfileScreen from './UserProfileScreen';
 import LakeMap from './LakeMap';
+import LottieView from 'lottie-react-native';
+import { MonitorLoadingScreen } from './assets/fish.json';
 
 // Prevent splash screen from auto-hiding until fonts are loaded
 SplashScreen.preventAutoHideAsync();

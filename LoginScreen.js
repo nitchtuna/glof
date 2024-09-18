@@ -39,12 +39,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#1a0000', // Muted gray border color
+    borderColor: '#59322f', // Muted gray border color
     backgroundColor: 'transparent',
     alignItems: 'center',
   },
   skipButtonText: {
-    color: '#1a0000', // Muted gray text color
+    color: '#59322f', // Muted gray text color
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 15,
     borderRadius: 8,
-    backgroundColor: '#4d0000', // Muted gray background color
+    backgroundColor: '#59322f', // Muted gray background color
     marginVertical: 10,
     alignItems: 'center',
   },
