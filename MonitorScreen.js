@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import * as Location from 'expo-location';
 import { getDistance } from './distanceUtils';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import mockGlacialLakes from './AratakiItto';
-import LottieView from 'lottie-react-native';
-
 
 const MonitorScreen = () => {
   const [location, setLocation] = useState(null);
@@ -13,15 +11,23 @@ const MonitorScreen = () => {
   const [selectedLake, setSelectedLake] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
   const route = useRoute();
   const navigation = useNavigation();
 
   // Use lake selected from the LakeMap, if available
   const { selectedLake: lakeFromMap } = route.params || {};
 
+  // If a lake is selected from the map, skip location fetching
   useEffect(() => {
     const fetchLocation = async () => {
+      if (lakeFromMap) {
+        // Skip location fetching if a lake was selected from the map
+        setSelectedLake(lakeFromMap);
+        setLoading(false);
+        return;
+      }
+
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
@@ -39,10 +45,11 @@ const MonitorScreen = () => {
     };
 
     fetchLocation();
-  }, []);
+  }, [lakeFromMap]);
 
+  // Once location is available, find nearby lakes (only if no lake was selected from the map)
   useEffect(() => {
-    if (location) {
+    if (location && !lakeFromMap) {
       setLoading(true);
       const nearby = mockGlacialLakes.filter((lake) => {
         const distance = getDistance(
@@ -55,25 +62,12 @@ const MonitorScreen = () => {
       });
 
       setNearbyLakes(nearby);
-      setSelectedLake(lakeFromMap || (nearby[0] || null));
+      setSelectedLake(nearby[0] || null); // Select the first nearby lake if no lake from map
       setLoading(false);
     }
   }, [location, lakeFromMap]);
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        {/* Add your Lottie animation here */}
-        <LottieView
-          source={require('./assets/fish.json')} // Update this to your actual Lottie file
-          autoPlay
-          loop
-          style={styles.lottie}
-        />
-      </View>
-    );
-  }
-
+  if (loading) return <ActivityIndicator />;
   if (error) return <Text>{error}</Text>;
 
   return (
@@ -85,18 +79,16 @@ const MonitorScreen = () => {
         <Text style={styles.buttonText}>Choose a Glacial Lake</Text>
       </TouchableOpacity>
 
-      {location && (
+      {location && !lakeFromMap && ( // Show location only when not using lakeFromMap
         <View style={styles.locationContainer}>
           <Text style={styles.locationText}>Latitude: {location.latitude.toFixed(4)}</Text>
           <Text style={styles.locationText}>Longitude: {location.longitude.toFixed(4)}</Text>
         </View>
       )}
 
-      {nearbyLakes.length === 0 ? (
+      {!selectedLake ? (
         <View style={styles.noLakesContainer}>
-          <Text style={styles.noLakesText}>
-            No nearby lakes found. Please choose a glacial lake to monitor.
-          </Text>
+          <Text style={styles.noLakesText}>No nearby lakes found. Please choose a glacial lake to monitor.</Text>
         </View>
       ) : (
         <>
@@ -105,18 +97,16 @@ const MonitorScreen = () => {
             <Text style={styles.modelPlaceholder}>3D Model Placeholder</Text>
           </View>
 
-          {selectedLake && (
-            <View style={styles.detailsContainer}>
-              <Text style={styles.detailText}>Lake Name: {selectedLake['Lake name'] || 'N/A'}</Text>
-              <Text style={styles.detailText}>River: {selectedLake['River'] || 'N/A'}</Text>
-              <Text style={styles.detailText}>Glacier: {selectedLake['Glacier'] || 'N/A'}</Text>
-              <Text style={styles.detailText}>Type of Lake: {selectedLake['Lake type'] || 'N/A'}</Text>
-              <Text style={styles.detailText}>Region: {selectedLake['Region'] || 'N/A'}</Text>
-              <Text style={styles.detailText}>Country: {selectedLake['Country'] || 'N/A'}</Text>
-            </View>
-          )}
+          <View style={styles.detailsContainer}>
+            <Text style={styles.detailText}>Lake Name: {selectedLake['Lake name'] || 'N/A'}</Text>
+            <Text style={styles.detailText}>River: {selectedLake['River'] || 'N/A'}</Text>
+            <Text style={styles.detailText}>Glacier: {selectedLake['Glacier'] || 'N/A'}</Text>
+            <Text style={styles.detailText}>Type of Lake: {selectedLake['Lake type'] || 'N/A'}</Text>
+            <Text style={styles.detailText}>Region: {selectedLake['Region'] || 'N/A'}</Text>
+            <Text style={styles.detailText}>Country: {selectedLake['Country'] || 'N/A'}</Text>
+          </View>
 
-          {nearbyLakes.length > 1 && (
+          {nearbyLakes.length > 1 && !lakeFromMap && ( // Show buttons for nearby lakes only if no lake from map
             <View style={styles.toggleContainer}>
               {nearbyLakes.map((lake, index) => (
                 <Animated.View
@@ -125,7 +115,7 @@ const MonitorScreen = () => {
                 >
                   <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handleButtonPress(index)}
+                    onPress={() => setSelectedLake(lake)}
                   >
                     <Text style={styles.buttonText}>{lake['Lake name']}</Text>
                   </TouchableOpacity>
@@ -143,7 +133,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#E0F7FA',
+    backgroundColor: '#E0F7FA', // Icy background color
   },
   chooseLakeButton: {
     position: 'absolute',
@@ -186,7 +176,8 @@ const styles = StyleSheet.create({
   },
   modelPlaceholder: {
     fontSize: 20,
-    color: '#00115b',
+    fontFamily: 'HelveticaNeue-Bold',
+    color: '#00115b', // Dark, icy tone for text
   },
   noLakesContainer: {
     flex: 1,
@@ -219,21 +210,11 @@ const styles = StyleSheet.create({
     margin: 8,
   },
   button: {
-    backgroundColor: '#00115b',
+    backgroundColor: '#00115b', // Demure background color
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#E0F7FA',
-  },
-  lottie: {
-    width: 150,
-    height: 150,
-  },
 });
 
-export default MonitorScreen;
+export default MonitorScreen; 
